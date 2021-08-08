@@ -1,0 +1,114 @@
+class Voiture  {
+
+public:
+    sf::Vector2f position;
+    sf::Vector2f OldPosition;
+
+    sf::Texture texture;
+    sf::Sprite sprite;
+
+    double apf = 1000; //acceleration per frame
+    double rpf = 100; // rotation per frame
+    double DeltaFrotement = 3000;
+
+    double speed;
+    double rotation;
+
+    double cos_x;
+    double sin_y;
+
+    float ax;
+    float ay;
+
+    float vx;
+    float vy;
+
+    Voiture(sf::Texture _texture_, sf::Vector2f _position_ ){
+        texture = _texture_;
+        position = _position_;
+
+        //
+        ax = 0;
+        ay = 0;
+
+        vx = 0;
+        vy = 0;
+
+        rotation = 0;
+        speed = 0;
+
+        cos_x = 1;
+        sin_y = 0;
+
+        sprite.setTexture(texture);
+        sprite.setOrigin(sprite.getGlobalBounds().width / 2, sprite.getGlobalBounds().height / 2 );
+        sprite.setPosition(position);
+        sprite.setRotation(rotation);
+        sprite.scale( 0.1, 0.1  );  //mettre le scale après position et origine sinon c'est fuck up
+        // sprite.setPosition(sf::Vector2f(0,0));
+
+        //
+        // std::cout << _spriteName <<std::endl;
+        std::cout <<"x           : "<< _position_.x                    << "\t  y          : "<< _position_.y  <<std::endl;
+        std::cout <<"x_width     : "<< sprite.getGlobalBounds().width << "\t  y_height   : "<< sprite.getGlobalBounds().height   <<std::endl;
+        std::cout <<"x_position  : "<< sprite.getPosition().x         << "\t  y_position : "<< sprite.getPosition().y   <<std::endl;
+
+
+    }
+
+    void accelerate(double deltaTime, int direction){
+        ax +=  apf * cos_x * deltaTime * direction;
+        ay +=  apf * sin_y * deltaTime * direction;
+
+
+    }
+
+    void turn(double deltaTime, int direction){
+
+        rotation += deltaTime * rpf * direction;
+        float radiant  = rotation * (3.142 / 180.0);
+        cos_x = cos(radiant);
+        sin_y = sin(radiant);
+
+        // double signe_x = 1;
+        // double signe_y = 1;
+        // if(vx < 0)
+        //     signe_x = -1;
+        // if(vy < 0)
+        //     signe_y = -1;
+
+        double norme = sqrt( vx*vx + vy*vy);
+        vx = cos_x * norme * signe_x;
+        vy = sin_y * norme * signe_y;
+
+        sprite.setRotation(rotation);
+
+
+    }
+
+    void update(double deltaTime){
+
+        //frotement
+        ax += - (vx * deltaTime * DeltaFrotement );
+        ay += - (vy * deltaTime * DeltaFrotement );
+
+        // ax -= (vx/1000
+        vx += ax * deltaTime;
+        vy += ay * deltaTime;
+
+        std::cout <<"ax  : "<< ax  << "\t  ay :  "<< ay <<std::endl;
+        std::cout <<"vx  : "<< vx  << "\t  vy :  "<< vy <<std::endl;
+
+        ax = 0;
+        ay = 0;
+
+        position.x += vx;
+        position.y += vy;
+
+        sprite.setPosition(position);
+    }
+
+    sf::Sprite getSprite(){
+        return sprite;
+    }
+};
