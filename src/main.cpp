@@ -163,7 +163,7 @@ boost::optional<sf::Vertex> intersect( sf::Vertex A, sf::Vertex B, sf::Vertex C,
 
     float M[2][2] = {{B.position.x - A.position.x , C.position.x - D.position.x},{B.position.y - A.position.y , C.position.y - D.position.y}};
     float V[2] = {C.position.x - A.position.x, C.position.y - A.position.y};
-    float det = M[0][0] * M[1][0] - M[0][1] * M[1][1];
+    float det = M[0][0] * M[1][1] - M[1][0] * M[0][1];
     if( det == 0){
         std::cout << "les 2 segments sont //" << std::endl;
         return boost::none;
@@ -176,7 +176,7 @@ boost::optional<sf::Vertex> intersect( sf::Vertex A, sf::Vertex B, sf::Vertex C,
     float X[2] = { M_inv[0][0] * V[0] + M_inv[0][1] * V[1], M_inv[1][0] * V[0] + M_inv[1][1] * V[1]  };
 
     //
-    if( !(0 <= X[0] && X[0] <= 1 && 0 <= X[1] && X[1] <= 1)){
+    if( !(0 < X[0] && X[0] < 1 && 0 < X[1] && X[1] < 1)){
         std::cout << "les 2 segments ne sont pas // mais ne se croisent pas" << std::endl;
         return boost::none;
     }
@@ -191,7 +191,31 @@ boost::optional<sf::Vertex> intersect( sf::Vertex A, sf::Vertex B, sf::Vertex C,
 int main()
 {
 
+    sf::Vertex A;
+    sf::Vertex B;
+    sf::Vertex C;
+    sf::Vertex D;
 
+    A.position.x = 0;
+    A.position.y = 0.5;
+
+    B.position.x = 1;
+    B.position.y = 0.5;
+
+    C.position.x = 0;
+    C.position.y = 0;
+
+    D.position.x = 0;
+    D.position.y = 1;
+
+    boost::optional<sf::Vertex> S = intersect(A,B,C,D);
+
+    if(S){
+        std::cout << "x : " << S->position.x << std::endl;
+        std::cout << "y : " << S->position.y << std::endl;
+    }
+
+    return 0 ;
 
 
 
