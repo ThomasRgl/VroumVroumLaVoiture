@@ -24,6 +24,9 @@ game : main.out csv.out voiture.out circuit.out intersect.out
 	$(CC) -o $(SFML_OUT) main.out csv.out voiture.out circuit.out intersect.out $(SFML_FLAG)
 	rm main.out
 	rm csv.out
+	rm voiture.out
+	rm circuit.out
+	rm intersect.out
 
 clear :
 	rm *.out
