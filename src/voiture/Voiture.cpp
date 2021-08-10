@@ -19,6 +19,11 @@ Voiture::Voiture(sf::Texture _texture_, sf::Vector2f _position_ ){
     sprite.setRotation(angle);
     sprite.scale( 0.1, 0.1  );  //mettre le scale après position et origine sinon c'est fuck up
 
+    for(int i = 0; i != NUM_VIEW; i ++){
+        view.push_back(sf::Vector2f(0,0));
+        std::cout << i << std::endl;
+        }
+        std::cout << view.size() << std::endl;
 }
 
 void Voiture::accelerate(double deltaTime, int direction){
@@ -59,6 +64,8 @@ void Voiture::update(double deltaTime){
 
     sprite.setPosition(position);
 }
+
+
 
 void Voiture::checkZone(Circuit map){
 
@@ -139,4 +146,57 @@ void Voiture::collide(Circuit map){
         }
 
     return;
+}
+
+void Voiture::updateView(Circuit map){
+    float newDistance;
+    float alpha = 360/NUM_VIEW;
+    sf::Vertex A;
+    sf::Vertex B;
+    boost::optional<sf::Vertex> I;
+
+    A.position = position;
+
+    // std::cout << "alpha" << alpha << std::endl;
+    std::cout << "angle : " << angle << std::endl;
+
+
+
+    for(size_t i = 0; i != NUM_VIEW; i++){
+
+        // std::cout << "angle" << angle + alpha * (i + 1) << std::endl;
+        float radiant  = (angle + alpha * (i + 1)  ) * (3.142 / 180.0);
+        B.position.x = cos(radiant) * 10000 + position.x;
+        B.position.y = sin(radiant) * 10000 + position.y;
+        view[i] = B.position ;
+        viewDistance[i] = 100000000000000;
+
+        for(size_t zone = 0; zone != map.getSize(); zone++){
+
+            //ext
+            if( I = intersectV2(A,B,map.GetVertices(2 * zone),map.GetVertices(2 * zone + 2)) ){
+                newDistance = pow(I->position.x - position.x, 2) + pow(I->position.y - position.y, 2);
+                if(newDistance < viewDistance[i]){
+                    view[i] = I->position ;
+                    viewDistance[i] = newDistance;
+                }
+            }
+
+            //int
+            else if(  I = intersectV2(A,B,map.GetVertices(2 * zone + 1),map.GetVertices(2 * zone + 3)) ){
+                newDistance = pow(I->position.x - position.x, 2) + pow(I->position.y - position.y, 2);
+                if(newDistance < viewDistance[i]){
+                    view[i] = I->position ;
+                    viewDistance[i] = newDistance;
+                }
+            }
+
+
+
+        }
+        // view[i].x += position.x;
+        // view[i].y += position.y;
+        std::cout << "-" << i << " x : "<< view[i].x << " y :"<< view[i].y << std::endl;
+
+    }
 }

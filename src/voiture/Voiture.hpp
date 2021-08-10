@@ -9,6 +9,7 @@
 
 #include "../circuit/Circuit.hpp"
 
+static const float NUM_VIEW = 8;
 
 class Voiture  {
 
@@ -18,6 +19,9 @@ public:
 
     sf::Texture texture;
     sf::Sprite sprite;
+
+    std::vector<sf::Vector2f> view;
+    float viewDistance[8];
 
     double apf = 250; //acceleration per frame
     double rpf = 100; // rotation per frame
@@ -41,6 +45,8 @@ public:
 
     void collide(Circuit map);
 
+    void updateView(Circuit map);
+
     sf::Sprite getSprite(){
         return sprite;
     }
@@ -49,12 +55,16 @@ public:
         return zone;
     }
 
-    sf::Vertex getPosition(){
+    sf::Vector2f getPosition(){
         return position;
     }
 
-    sf::Vertex getOldPosition(){
+    sf::Vector2f getOldPosition(){
         return oldPosition;
+    }
+
+    std::vector<sf::Vector2f> getView(){
+        return view;
     }
 };
 

@@ -64,7 +64,8 @@ int main()
     float pos_x = ( (*vertices)[0].position.x + (*vertices)[1].position.x + (*vertices)[2].position.x + (*vertices)[3].position.x)/4;
     float pos_y = ( (*vertices)[0].position.y + (*vertices)[1].position.y + (*vertices)[2].position.y + (*vertices)[3].position.y)/4;
     Voiture voiture(voiture_texture, sf::Vector2f( pos_x, pos_y ));
-
+    // Voiture voiture(voiture_texture, sf::Vector2f( 0,0 ));
+    voiture.updateView(map);
     // (*vertices)[0].color = sf::Color::Green;
     // (*vertices)[1].color = sf::Color::Green;
     // (*vertices)[2].color = sf::Color::Green;
@@ -180,6 +181,9 @@ int main()
         voiture.update(deltaTime);
         voiture.checkZone(map);
         voiture.collide(map);
+        voiture.updateView(map);
+
+
         map.highlightZone(voiture.getZone());
         // map.checkZone(voiture);
 
@@ -195,6 +199,17 @@ int main()
         window.draw(map);
         window.draw(voiture.getSprite());
 
+        //draw view
+        // sf::Vertex(voiture.getPosition().position , sf::Color::Magenta
+        sf::Vertex voiture_point (voiture.getPosition() , sf::Color::Magenta);
+        sf::Vertex line [2];
+        line[0] = voiture_point;
+        for(int i = 0; i != NUM_VIEW; i++){
+            line[1] = sf::Vertex(voiture.getView()[i], sf::Color::Magenta);
+            std::cout << i << " x : "<< voiture.getView()[i].x << " y :"<< voiture.getView()[i].y << std::endl;
+            window.draw(line,2,sf::Lines);
+        }
+        // window.draw());
         //
         window.setView(window.getDefaultView());
         window.draw(fps);
