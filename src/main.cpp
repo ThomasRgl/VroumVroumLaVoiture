@@ -17,7 +17,7 @@ static const float VIEW_SIZE = 1000.f;
 int main()
 {
 
-    // return 0;
+
     sf::RenderWindow window(sf::VideoMode(VIEW_SIZE, VIEW_SIZE), "Vroum Vroum la voiture");
 
     // Sync Framerate and speed
@@ -25,13 +25,7 @@ int main()
 
     //
     sf::View view(sf::Vector2f(0.0f,0.0f), sf::Vector2f( VIEW_SIZE, VIEW_SIZE));
-    // sf::View minimap(sf::Vector2f(-2.5f * VIEW_SIZE , -2.5f * VIEW_SIZE), sf::Vector2f( VIEW_SIZE*5, VIEW_SIZE*5));
-    // sf::View view(sf::Vector2f(0.0f,0.0f), sf::Vector2f( VIEW_SIZE, VIEW_SIZE));
-
-    //
     view.setViewport(sf::FloatRect(0.f, 0.f, 1.f, 1.f));
-    // minimap.setViewport(sf::FloatRect(0.75f, 0.f, 0.25f, 0.25f));
-
 
     // Font
     sf::Font font;
@@ -46,7 +40,6 @@ int main()
     Circuit map("test.csv");
     double multiplier = 50;
     double deltaTime;
-    float move = 0.f;
 
     u_int window_size_x = window.getSize().x;
     u_int window_size_y = window.getSize().y;
@@ -64,17 +57,8 @@ int main()
     float pos_x = ( (*vertices)[0].position.x + (*vertices)[1].position.x + (*vertices)[2].position.x + (*vertices)[3].position.x)/4;
     float pos_y = ( (*vertices)[0].position.y + (*vertices)[1].position.y + (*vertices)[2].position.y + (*vertices)[3].position.y)/4;
     Voiture voiture(voiture_texture, sf::Vector2f( pos_x, pos_y ));
-    // Voiture voiture(voiture_texture, sf::Vector2f( 0,0 ));
-    voiture.updateView(map);
-    // (*vertices)[0].color = sf::Color::Green;
-    // (*vertices)[1].color = sf::Color::Green;
-    // (*vertices)[2].color = sf::Color::Green;
-    // (*vertices)[3].color = sf::Color::Green;
 
-    // map.vertices[0].color = sf::Color::Green;
-    // map.vertices[1].color = sf::Color::Green;
-    // map.vertices[2].color = sf::Color::Green;
-    // map.vertices[3].color = sf::Color::Green;
+    voiture.updateView(map);
 
     while (window.isOpen())
     {
@@ -108,9 +92,7 @@ int main()
         deltaTime = clock.restart().asSeconds();
         fps.setString("fps : " +  std::to_string(1.f / deltaTime));
 
-        //Update
-        move = 10.f * multiplier * deltaTime;
-        // tic++;
+
 
         //Update Shapes ZQSD
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Z) )
@@ -121,15 +103,6 @@ int main()
             voiture.turn(deltaTime, -1 );
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)  )
             voiture.turn(deltaTime, 1 );
-
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::W) )
-            map.highlightZone(0);
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::X) )
-            map.highlightZone(1);
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::C) )
-            map.highlightZone(2);
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::V)  )
-            map.highlightZone(3);
 
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::M) ){
             std::cout << "enregistrement en cours, appuyez sur echap pour finir" << std::endl;
@@ -178,16 +151,13 @@ int main()
 
 
         //Update
-        voiture.update(deltaTime);
-        voiture.checkZone(map);
-        voiture.collide(map);
-        voiture.updateView(map);
+        voiture.update(deltaTime, map);
 
 
         map.highlightZone(voiture.getZone());
-        // map.checkZone(voiture);
 
-        //Collision
+
+
 
         window.clear();
 
@@ -200,17 +170,23 @@ int main()
         window.draw(voiture.getSprite());
 
         //draw view
-        // sf::Vertex(voiture.getPosition().position , sf::Color::Magenta
         sf::Vertex voiture_point (voiture.getPosition() , sf::Color::Magenta);
         sf::Vertex line [2];
         line[0] = voiture_point;
         for(int i = 0; i != NUM_VIEW; i++){
             line[1] = sf::Vertex(voiture.getView()[i], sf::Color::Magenta);
-            std::cout << i << " x : "<< voiture.getView()[i].x << " y :"<< voiture.getView()[i].y << std::endl;
+            // std::cout << i << " x : "<< voiture.getView()[i].x << " y :"<< voiture.getView()[i].y << std::endl;
             window.draw(line,2,sf::Lines);
+            // std::cout << i << " : " << voiture.viewDistance[i] << std::endl;
         }
-        // window.draw());
-        //
+
+        //draw nearest checkPoint
+        sf::Vertex line2 [2];
+
+        line2[0] = sf::Vertex(voiture.getPosition() , sf::Color::Blue);
+        line2[1] = sf::Vertex(voiture.pointCP, sf::Color::Blue);
+        window.draw(line2,2,sf::Lines);
+
         window.setView(window.getDefaultView());
         window.draw(fps);
         window.display();

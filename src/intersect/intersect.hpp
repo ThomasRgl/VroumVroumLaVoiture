@@ -8,10 +8,10 @@
 #include <boost/optional.hpp>
 
 
-boost::optional<sf::Vertex> intersect( sf::Vertex A, sf::Vertex B, sf::Vertex C, sf::Vertex D);
+boost::optional<sf::Vector2f> intersect( sf::Vector2f A, sf::Vector2f B, sf::Vector2f C, sf::Vector2f D);
 
-boost::optional<sf::Vertex> intersectV2( sf::Vertex A, sf::Vertex B, sf::Vertex C, sf::Vertex D);
+boost::optional<sf::Vector2f> intersectV2( sf::Vector2f A, sf::Vector2f B, sf::Vector2f C, sf::Vector2f D);
 
-
+sf::Vector2f minimum_distance(sf::Vector2f v, sf::Vector2f w, sf::Vector2f p);
 
 #endif

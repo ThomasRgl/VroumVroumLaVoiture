@@ -21,7 +21,10 @@ public:
     sf::Sprite sprite;
 
     std::vector<sf::Vector2f> view;
-    float viewDistance[8];
+    double viewDistance[8];
+
+    double distanceCP;
+    sf::Vector2f pointCP;
 
     double apf = 250; //acceleration per frame
     double rpf = 100; // rotation per frame
@@ -39,13 +42,19 @@ public:
 
     void turn(double deltaTime, int direction);
 
-    void update(double deltaTime);
+    void update(double deltaTime, Circuit map);
 
     void checkZone(Circuit map);
 
     void collide(Circuit map);
 
     void updateView(Circuit map);
+
+    void updateDistanceToCheckpoint(Circuit map);
+
+    double*  getInput();
+
+    size_t getNumInput();
 
     sf::Sprite getSprite(){
         return sprite;
