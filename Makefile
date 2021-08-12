@@ -1,8 +1,13 @@
 CC=g++
+GCC = gcc
 SFML_FLAG= -lsfml-graphics -lsfml-window -lsfml-system
 # MAIN_OUT= main.out
 SFML_OUT= sfml-app.out
 # INPUT_FILE= main.cpp  Entity.cpp
+FLAG_OPTI = -O3 -finline-functions -funroll-loops -march=native -mtune=native -flto -lpthread
+LFLAGS=-lm -lpthread
+
+
 all : game
 
 main.out : src/main.cpp
@@ -20,13 +25,17 @@ circuit.out : src/circuit/Circuit.cpp
 intersect.out : src/intersect/intersect.cpp
 	$(CC) -c "src/intersect/intersect.cpp" -o intersect.out
 
-game : main.out csv.out voiture.out circuit.out intersect.out
-	$(CC) -o $(SFML_OUT) main.out csv.out voiture.out circuit.out intersect.out $(SFML_FLAG)
+nn.out : src/neuralNetwork/neuralNetwork.c
+	$(GCC) -c $(FLAG_OPTI) -o nn.out "src/neuralNetwork/neuralNetwork.c"   $(LFLAGS)
+
+game : main.out csv.out voiture.out circuit.out intersect.out nn.out
+	$(CC) -o $(SFML_OUT) main.out csv.out voiture.out circuit.out intersect.out  nn.out $(SFML_FLAG)
 	rm main.out
 	rm csv.out
 	rm voiture.out
 	rm circuit.out
 	rm intersect.out
+	rm nn.out
 
 clear :
 	rm *.out

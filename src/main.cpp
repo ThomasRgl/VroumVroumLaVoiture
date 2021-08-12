@@ -9,14 +9,16 @@
 #include "circuit/Circuit.hpp"
 #include "voiture/Voiture.hpp"
 // #include "intersect/intersect.hpp"
-
+extern "C"{
+#include "neuralNetwork/neuralNetwork.h"
+}
 
 static const float VIEW_SIZE = 1000.f;
 
 
 int main()
 {
-
+    sigmoid(20);
 
     sf::RenderWindow window(sf::VideoMode(VIEW_SIZE, VIEW_SIZE), "Vroum Vroum la voiture");
 

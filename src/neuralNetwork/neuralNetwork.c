@@ -5,7 +5,7 @@
 #include <string.h>
 #include <pthread.h>
 
-#include "../snake/snake.h"
+// #include "../snake/snake.h"
 #include "neuralNetwork.h"
 
 
@@ -669,6 +669,7 @@ Fonction jeu qui sera controllé par un nn
 @param NeuralNetwork * nn : nn controllant le jeu
 */
 void game(NeuralNetwork * nn){
+    /*
 
     Snake * snake ;
     snake = malloc(sizeof(Snake));
@@ -716,13 +717,14 @@ void game(NeuralNetwork * nn){
     setScore(nn, getScore(snake), getFruit(snake));
     destroySnake(snake);
 
+    */
     return;
 }
-
 /*
 Joue le meileur élément de la population
 */
-void playBest( NeuralNetwork * nn){
+
+void playBest( NeuralNetwork * nn){/*
     // printf("aaaaaa\n" );
     Snake * snake ;
 
@@ -773,8 +775,8 @@ void playBest( NeuralNetwork * nn){
     destroySnake(snake);
 
     return;
+    */
 }
-
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -872,6 +874,7 @@ Affiche le jeu
 @param int resultat :
 @param Snake * snake :
 */
+/*
 void afficherJeu(int resultat, Snake * snake ){
     afficheGrille( snake );
     switch (resultat) {
@@ -891,7 +894,7 @@ void afficherJeu(int resultat, Snake * snake ){
             break;
         }
 }
-
+*/
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////                       garbage collector                           /////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////

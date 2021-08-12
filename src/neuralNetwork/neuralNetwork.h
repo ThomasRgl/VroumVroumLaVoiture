@@ -1,4 +1,11 @@
-#include "../snake/snake.h"
+// #include "../snake/snake.h"
+
+#include <time.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
 
 #ifndef NN_H
     #define NN_H
@@ -211,7 +218,7 @@
 
     void printPopulaton(Population *population );
 
-    void afficherJeu(int resultat, Snake * snake );
+    // void afficherJeu(int resultat, Snake * snake );
 
     void jump(int a);
 
