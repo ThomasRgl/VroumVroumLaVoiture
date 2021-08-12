@@ -18,7 +18,6 @@
     FILE* fileFruit;
 
 
-
     typedef struct Config{
         size_t taille_population;
         size_t generation;
@@ -110,6 +109,11 @@
 
     }Thread;
 
+    typedef struct thread_args
+    {
+        Thread * thread;
+        void (*func) (NeuralNetwork * nn);
+    }thread_args;
 
     Config params;
     unsigned int  seed;
@@ -194,9 +198,9 @@
 
     Thread * NewThread(Population *population, size_t numThread, pthread_t * id);
 
-    void *runFils(void *voidThread );
+    void * runFils( void *voidArgs ); //void *voidThread, void (*gameFunc) (NeuralNetwork * nn) );
 
-    void runPere( );
+    void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn) , void (*playBestFunc)(NeuralNetwork * nn) );
 
     void calculateFitness(Thread *thread );
 

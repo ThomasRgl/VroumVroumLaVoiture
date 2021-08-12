@@ -29,7 +29,7 @@ nn.out : src/neuralNetwork/neuralNetwork.c
 	$(GCC) -c $(FLAG_OPTI) -o nn.out "src/neuralNetwork/neuralNetwork.c"   $(LFLAGS)
 
 game : main.out csv.out voiture.out circuit.out intersect.out nn.out
-	$(CC) -o $(SFML_OUT) main.out csv.out voiture.out circuit.out intersect.out  nn.out $(SFML_FLAG)
+	$(CC) -o $(SFML_OUT) $(FLAG_OPTI) main.out csv.out voiture.out circuit.out intersect.out  nn.out $(SFML_FLAG)
 	rm main.out
 	rm csv.out
 	rm voiture.out

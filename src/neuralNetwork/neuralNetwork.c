@@ -511,16 +511,18 @@ Thread * NewThread(Population *population, size_t numThread, pthread_t * id){
 /*
 Fonction que chaque thread fils va executer
 */
-void *runFils(void *voidThread ){
+void * runFils(void *voidArgs){//void *voidThread, void (*gameFunc) (NeuralNetwork * nn) ){
 
-    Thread * thread = (Thread *)voidThread;
+    thread_args * args = (thread_args *)voidArgs;
+    // Thread * thread = (Thread *)voidThread;
+    Thread * thread = args->thread;
 
     for(size_t gen = 0; gen < params.generation; gen++){
 
         //thread synchronisation pour la game
         pthread_barrier_wait(&barrier1);
         for (size_t i = 0; i < thread->size; i++) {
-            game(thread->ListNeuralNetwork_A[i]);
+            args->func(thread->ListNeuralNetwork_A[i]);
         }
 
         //thread synchronisation pour le calcule de fitness
@@ -546,10 +548,10 @@ void *runFils(void *voidThread ){
 Fonction executée par le thread père
 elle créer n threads fils puis les coordonne un certain nombre de génération
 */
-void runPere(){
+void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn) , void (*playBestFunc)(NeuralNetwork * nn) ){
 
     //ouverture fichier de log
-    fileScore = openLog("log/fruit.csv");
+    fileScore = openLog( fileName );
 
     //création de la population
     Population * population = newPopulation(  );
@@ -566,9 +568,12 @@ void runPere(){
     Thread ** threadList = malloc(params.nbThread * sizeof(Thread));
     pthread_t * idList = malloc(params.nbThread * sizeof(pthread_t));
 
+    thread_args args;
+    args.func = gameFunc;
     for( size_t i = 0; i < params.nbThread; i++){
         threadList[i] = NewThread(population, i, &idList[i] );
-        pthread_create(&idList[i], NULL, runFils, threadList[i] );
+        args.thread = threadList[i];
+        pthread_create(&idList[i], NULL, runFils, &args );
         // getchar()
     }
 
@@ -594,7 +599,7 @@ void runPere(){
         //écrit les scores dans les logs
         writeLogScore(fileScore, population);
         if( g%500 == 0){
-            playBest(bestElement(population ));
+            playBestFunc(bestElement(population ));
         }
     }
 
