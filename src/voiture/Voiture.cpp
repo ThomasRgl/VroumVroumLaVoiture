@@ -12,6 +12,8 @@ Voiture::Voiture(sf::Texture _texture_, sf::Vector2f _position_ ){
     angle = -90;
     acceleration = 0;
     zone = 0;
+    fuel = maxFuel;
+    boolAlive = true;
 
     sprite.setTexture(texture);
     sprite.setOrigin(sprite.getGlobalBounds().width / 2, sprite.getGlobalBounds().height / 2 );
@@ -21,10 +23,32 @@ Voiture::Voiture(sf::Texture _texture_, sf::Vector2f _position_ ){
 
     for(int i = 0; i != NUM_VIEW; i ++){
         view.push_back(sf::Vector2f(0,0));
-        std::cout << i << std::endl;
+        // std::cout << i << std::endl;
         }
-        std::cout << view.size() << std::endl;
+        // std::cout << view.size() << std::endl;
 }
+
+Voiture::Voiture( sf::Vector2f _position_ ){
+    position = _position_;
+    oldPosition = position;
+
+    //
+    speed = 0;
+    angle = -90;
+    acceleration = 0;
+    zone = 0;
+    fuel = maxFuel;
+    boolAlive = true;
+
+    // sprite.setTexture(texture);
+    // sprite.setOrigin(sprite.getGlobalBounds().width / 2, sprite.getGlobalBounds().height / 2 );
+    // sprite.setPosition(position);
+    // sprite.setRotation(angle);
+    // sprite.scale( 0.1, 0.1  );  //mettre le scale après position et origine sinon c'est fuck up
+
+    for(int i = 0; i != NUM_VIEW; i ++)
+        view.push_back(sf::Vector2f(0,0));
+    }
 
 void Voiture::accelerate(double deltaTime, int direction){
     acceleration += apf * direction  * deltaTime;
@@ -37,7 +61,6 @@ void Voiture::turn(double deltaTime, int direction){
         angle += deltaTime * rpf * direction;
     else
         angle += deltaTime * -rpf * direction;
-    sprite.setRotation(angle);
 }
 
 void Voiture::update(double deltaTime, Circuit map){
@@ -62,12 +85,19 @@ void Voiture::update(double deltaTime, Circuit map){
     position.x += cos(radiant) * speed;
     position.y += sin(radiant) * speed;
 
-    sprite.setPosition(position);
+
 
     checkZone(map);
     collide(map);
     updateView(map);
     updateDistanceToCheckpoint(map);
+
+    fuel -= 1;
+}
+
+void Voiture::UpdateSprite(){
+    sprite.setPosition(position);
+    sprite.setRotation(angle);
 }
 
 
@@ -88,7 +118,8 @@ void Voiture::checkZone(Circuit map){
 
             C = map.GetVertices(2 * zone).position; // zone precedante
             D = map.GetVertices(2 * zone + 1).position;
-
+            if(score > 0)
+                score -= 1;
         } while( intersectV2(A,B,C,D) );
 
         return;
@@ -107,7 +138,7 @@ void Voiture::checkZone(Circuit map){
 
             C = map.GetVertices(2 * zone + 2).position; // zone suivante
             D = map.GetVertices(2 * zone + 3).position;
-
+            score += 1;
         } while( intersectV2(A,B,C,D) );
 
         return;
@@ -130,8 +161,8 @@ void Voiture::collide(Circuit map){
         speed = 0;
         checkZone(map);
         oldPosition = position;
-        std::cout << "Collision - x :  " << I->x << "  y : " << I->y << std::endl;
-
+        boolAlive = false;
+        // std::cout << "Collision - x :  " << I->x << "  y : " << I->y << std::endl;
         }
 
 
@@ -147,6 +178,7 @@ void Voiture::collide(Circuit map){
         speed = 0;
         checkZone(map);
         oldPosition = position;
+        boolAlive = false;
         std::cout << "Collision - x :  " << I->x << "  y : " << I->y << std::endl;
         }
 
@@ -183,7 +215,7 @@ void Voiture::updateView(Circuit map){
                 newDistance = pow(I->x - position.x, 2) + pow(I->y - position.y, 2);
                 if(newDistance < viewDistance[i]){
                     view[i] = *I ;
-                    viewDistance[i] = newDistance;
+                    viewDistance[i] = sqrt(newDistance);
                 }
             }
 
@@ -192,7 +224,7 @@ void Voiture::updateView(Circuit map){
                 newDistance = pow(I->x - position.x, 2) + pow(I->y - position.y, 2);
                 if(newDistance < viewDistance[i]){
                     view[i] = *I ;
-                    viewDistance[i] = newDistance;
+                    viewDistance[i] = sqrt(newDistance);
                 }
             }
 

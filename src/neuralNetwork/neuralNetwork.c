@@ -516,22 +516,28 @@ void * runFils(void *voidArgs){//void *voidThread, void (*gameFunc) (NeuralNetwo
     thread_args * args = (thread_args *)voidArgs;
     // Thread * thread = (Thread *)voidThread;
     Thread * thread = args->thread;
+    printf("%ld\n", thread->size );
 
     for(size_t gen = 0; gen < params.generation; gen++){
 
         //thread synchronisation pour la game
         pthread_barrier_wait(&barrier1);
+        printf("play \n" );
         for (size_t i = 0; i < thread->size; i++) {
-            args->func(thread->ListNeuralNetwork_A[i]);
+            args->func(thread->ListNeuralNetwork_A[i], args->gameArgs);
         }
 
         //thread synchronisation pour le calcule de fitness
         pthread_barrier_wait(&barrier2);
+        printf("calcul fitness\n" );
         calculateFitness(thread);
 
         //thread synchronisation pour evolution
         pthread_barrier_wait(&barrier3);
+        printf("evolve\n" );
         evolve(thread);
+
+        printf("end thread\n" );
 
     }
 
@@ -548,7 +554,7 @@ void * runFils(void *voidArgs){//void *voidThread, void (*gameFunc) (NeuralNetwo
 Fonction executée par le thread père
 elle créer n threads fils puis les coordonne un certain nombre de génération
 */
-void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn) , void (*playBestFunc)(NeuralNetwork * nn) ){
+void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn, void * gameArgs) , void (*playBestFunc)(NeuralNetwork * nn, void * gameArgs), void * gameArgs ){
 
     //ouverture fichier de log
     fileScore = openLog( fileName );
@@ -568,12 +574,13 @@ void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn) , void (*pla
     Thread ** threadList = malloc(params.nbThread * sizeof(Thread));
     pthread_t * idList = malloc(params.nbThread * sizeof(pthread_t));
 
-    thread_args args;
-    args.func = gameFunc;
+    thread_args * args = malloc( params.nbThread * sizeof(thread_args) );
     for( size_t i = 0; i < params.nbThread; i++){
+        args[i].func = gameFunc;
+        args[i].gameArgs = gameArgs;
         threadList[i] = NewThread(population, i, &idList[i] );
-        args.thread = threadList[i];
-        pthread_create(&idList[i], NULL, runFils, &args );
+        args[i].thread = threadList[i];
+        pthread_create(&idList[i], NULL, runFils, &args[i] );
         // getchar()
     }
 
@@ -598,8 +605,8 @@ void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn) , void (*pla
 
         //écrit les scores dans les logs
         writeLogScore(fileScore, population);
-        if( g%500 == 0){
-            playBestFunc(bestElement(population ));
+        if( g%1 == 0){
+            playBestFunc(bestElement(population), gameArgs );
         }
     }
 
@@ -626,18 +633,20 @@ void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn) , void (*pla
 
 /*
 Calcule la fitness de chaque element du thread
+Calcul sum à optimiser  !
 */
 void calculateFitness(Thread *thread ){
     double sum = 0;
 
     NeuralNetwork ** ListNeuralNetwork = thread->population->firstPopulation;
 
-    for( size_t i = 0; i < thread->population->size; i++)
+    for( size_t i = 0; i < thread->population->size; i++){
         sum += ListNeuralNetwork[i]->score;
-
+        // printf("%p :: score : %f\n", thread, ListNeuralNetwork[i]->score );
+        }
     for( size_t i = 0; i < thread->size; i++){
         thread->ListNeuralNetwork_A[i]->fitness = thread->ListNeuralNetwork_A[i]->score  / sum;
-
+        printf("%p :: score : %f, sum : %f, fitness : %f\n", thread, thread->ListNeuralNetwork_A[i]->score, sum, thread->ListNeuralNetwork_A[i]->score  / sum);
     }
 
 }

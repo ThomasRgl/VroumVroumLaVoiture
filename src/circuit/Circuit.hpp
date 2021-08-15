@@ -7,7 +7,7 @@
 #include <cmath>
 #include <boost/optional.hpp>
 
-class Circuit : public sf::Drawable {
+class Circuit : public sf::Drawable  {
 private:
     size_t sizeCircuit;
 public:
@@ -30,9 +30,15 @@ public:
         return vertices[i];
     }
 
+
     void draw(sf::RenderTarget& target, sf::RenderStates states) const{
         target.draw(&vertices[0], vertices.size(), sf::TriangleStrip, states);
     }
+
+
+    sf::Vector2f getZoneCenter();
+
+    // Sprite getSprite(){return sprite ;}
 };
 
 #endif

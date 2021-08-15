@@ -91,15 +91,15 @@ sf::Vector2f minimum_distance(sf::Vector2f v, sf::Vector2f w, sf::Vector2f p) {
   projection.x = v.x + t * (w.x - v.x);
   projection.y = v.y + t * (w.y - v.y);
 
-  std::cout << "dot : " << (p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y) << std::endl;
-  std::cout << "l2 : " << l2 << std::endl;
-  std::cout << "dot/l2 : " << ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2 << std::endl;
-
-  std::cout << "v.x : " << v.x << " v.y : " << v.y << std::endl;
-  std::cout << "w.x : " << w.x << " v.y : " << w.y << std::endl;
-  std::cout << "p.x : " << p.x << " v.y : " << p.y << std::endl;
-
-  std::cout << "x : " << projection.x << " y : " << projection.y << std::endl;
+  // std::cout << "dot : " << (p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y) << std::endl;
+  // std::cout << "l2 : " << l2 << std::endl;
+  // std::cout << "dot/l2 : " << ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2 << std::endl;
+  //
+  // std::cout << "v.x : " << v.x << " v.y : " << v.y << std::endl;
+  // std::cout << "w.x : " << w.x << " v.y : " << w.y << std::endl;
+  // std::cout << "p.x : " << p.x << " v.y : " << p.y << std::endl;
+  //
+  // std::cout << "x : " << projection.x << " y : " << projection.y << std::endl;
   return projection;
 }
 

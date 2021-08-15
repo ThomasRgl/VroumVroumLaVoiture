@@ -4,32 +4,33 @@ SFML_FLAG= -lsfml-graphics -lsfml-window -lsfml-system
 # MAIN_OUT= main.out
 SFML_OUT= sfml-app.out
 # INPUT_FILE= main.cpp  Entity.cpp
-FLAG_OPTI = -O3 -finline-functions -funroll-loops -march=native -mtune=native -flto -lpthread
+FLAG_OPTI = -O3 -finline-functions -funroll-loops -march=native -mtune=native -flto
+DEBUG_FLAG = -g -Wall -Werror
 LFLAGS=-lm -lpthread
 
 
 all : game
 
 main.out : src/main.cpp
-	$(CC) -c "src/main.cpp" -o main.out
+	$(CC) -c $(DEBUG_FLAG) "src/main.cpp" -o main.out
 
 csv.out : src/csv/csv.cpp
-	$(CC) -c "src/csv/csv.cpp" -o csv.out
+	$(CC) -c $(DEBUG_FLAG) "src/csv/csv.cpp" -o csv.out
 
 voiture.out : src/voiture/Voiture.cpp
-	$(CC) -c "src/voiture/Voiture.cpp" -o voiture.out
+	$(CC) -c $(DEBUG_FLAG) "src/voiture/Voiture.cpp" -o voiture.out
 
 circuit.out : src/circuit/Circuit.cpp
-	$(CC) -c "src/circuit/Circuit.cpp" -o circuit.out
+	$(CC) -c $(DEBUG_FLAG) "src/circuit/Circuit.cpp" -o circuit.out
 
 intersect.out : src/intersect/intersect.cpp
-	$(CC) -c "src/intersect/intersect.cpp" -o intersect.out
+	$(CC) -c  $(DEBUG_FLAG) "src/intersect/intersect.cpp" -o intersect.out
 
 nn.out : src/neuralNetwork/neuralNetwork.c
-	$(GCC) -c $(FLAG_OPTI) -o nn.out "src/neuralNetwork/neuralNetwork.c"   $(LFLAGS)
+	$(GCC) -c $(DEBUG_FLAG) -o nn.out "src/neuralNetwork/neuralNetwork.c"
 
 game : main.out csv.out voiture.out circuit.out intersect.out nn.out
-	$(CC) -o $(SFML_OUT) $(FLAG_OPTI) main.out csv.out voiture.out circuit.out intersect.out  nn.out $(SFML_FLAG)
+	$(CC) -o $(SFML_OUT) $(DEBUG_FLAG) main.out csv.out voiture.out circuit.out intersect.out  nn.out $(SFML_FLAG) $(LFLAGS)
 	rm main.out
 	rm csv.out
 	rm voiture.out

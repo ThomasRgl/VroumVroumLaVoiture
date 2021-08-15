@@ -112,7 +112,8 @@
     typedef struct thread_args
     {
         Thread * thread;
-        void (*func) (NeuralNetwork * nn);
+        void (*func) (NeuralNetwork * nn, void * gameArgs);
+        void * gameArgs;
     }thread_args;
 
     Config params;
@@ -200,7 +201,7 @@
 
     void * runFils( void *voidArgs ); //void *voidThread, void (*gameFunc) (NeuralNetwork * nn) );
 
-    void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn) , void (*playBestFunc)(NeuralNetwork * nn) );
+    void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn, void * gameArgs) , void (*playBestFunc)(NeuralNetwork * nn, void * gameArgs), void * gameArgs );
 
     void calculateFitness(Thread *thread );
 

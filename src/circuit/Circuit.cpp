@@ -10,8 +10,8 @@ Circuit::Circuit(std::string fileName){
     exit(-1);
 
 
-    for (int i = 0; i != test[0].second.size(); i++){
-        std::cout << test[0].second[i] << ',' <<  test[1].second[i] << std::endl;
+    for (size_t i = 0; i != test[0].second.size(); i++){
+        // std::cout << test[0].second[i] << ',' <<  test[1].second[i] << std::endl;
         sf::Vertex vertex;
         vertex.position = sf::Vector2f(test[0].second[i], test[1].second[i]);
         vertex.color = sf::Color(128,128,128);
@@ -28,7 +28,7 @@ void Circuit::highlightZone( size_t n ){
         return;
     }
 
-    for (int i = 0; i != vertices.size(); i++){
+    for (size_t i = 0; i != vertices.size(); i++){
         vertices[i].color = sf::Color(128,128,128);
     }
 
@@ -36,4 +36,10 @@ void Circuit::highlightZone( size_t n ){
     vertices[n * 2 + 1].color = sf::Color::Green;
     vertices[n * 2 + 2].color = sf::Color::Green;
     vertices[n * 2 + 3].color = sf::Color::Green;
+}
+
+sf::Vector2f Circuit::getZoneCenter(){
+    return sf::Vector2f( ( vertices[0].position.x + vertices[1].position.x + vertices[2].position.x + vertices[3].position.x)/4  ,
+                         ( vertices[0].position.y + vertices[1].position.y + vertices[2].position.y + vertices[3].position.y)/4 ) ;
+
 }
