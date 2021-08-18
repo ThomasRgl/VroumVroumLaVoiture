@@ -13,7 +13,7 @@ Circuit::Circuit(std::string fileName){
     for (size_t i = 0; i != test[0].second.size(); i++){
         // std::cout << test[0].second[i] << ',' <<  test[1].second[i] << std::endl;
         sf::Vertex vertex;
-        vertex.position = sf::Vector2f(test[0].second[i], test[1].second[i]);
+        vertex.position = sf::Vector2f(test[0].second[i]*2, test[1].second[i]*2);
         vertex.color = sf::Color(128,128,128);
         vertices.push_back(vertex);
         // vertices.push_back(sf::Vertex(test[0].second[i], test[1].second[i]));

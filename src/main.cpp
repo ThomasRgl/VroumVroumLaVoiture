@@ -66,10 +66,10 @@ void game(NeuralNetwork * nn, void * args){
                 voiture.accelerate(deltaTime, -1 );
                 break;
             case 2:
-                voiture.turn(deltaTime, -1 );
+                voiture.turn(deltaTime, 1 );
                 break;
             case 3:
-                voiture.turn(deltaTime, 1 );
+                voiture.turn(deltaTime, -1 );
                 break;
             case 4:
                 break;
@@ -196,7 +196,7 @@ void ShowGame( NeuralNetwork * nn, void * args){
         // }
 
         resultat = computeNN( nn, input);
-        std::cout << "resultat : " << resultat << '\n';
+        // std::cout << "resultat : " << resultat << '\n';
         switch (resultat) {
             case 0:
                 voiture.accelerate(deltaTime, 1 );
@@ -205,10 +205,10 @@ void ShowGame( NeuralNetwork * nn, void * args){
                 voiture.accelerate(deltaTime, -1 );
                 break;
             case 2:
-                voiture.turn(deltaTime, -1 );
+                voiture.turn(deltaTime, 1 );
                 break;
             case 3:
-                voiture.turn(deltaTime, 1 );
+                voiture.turn(deltaTime, -1 );
                 break;
             case 4:
                 break;
@@ -276,7 +276,7 @@ void ShowGame( NeuralNetwork * nn, void * args){
 
 
 
-int main_()
+int main()
 {
     srand(time(NULL));
 
@@ -303,7 +303,7 @@ int main_()
         1           //size_t nbThread
     );
 
-    Circuit map1("test.csv");
+    Circuit map1("c1.csv");
     Circuit * p_map1;
     p_map1 = &map1;
 
@@ -353,7 +353,7 @@ int main_(){
 
     //
     sf::Clock clock;
-    Circuit mapa("test.csv");
+    Circuit mapa("c1.csv");
     Circuit * map;
     map = & mapa; //= ((VroumVroumArgs *) args)->circuit;
     // double multiplier = 50;
@@ -430,6 +430,50 @@ int main_(){
             voiture.turn(deltaTime, -1 );
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)  )
             voiture.turn(deltaTime, 1 );
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::M) ){
+                std::cout << "enregistrement en cours, appuyez sur echap pour finir" << std::endl;
+                while (! sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)){
+                    sf::CircleShape circle;
+                    while (window.pollEvent(event))
+                    {
+                        switch (event.type){
+
+
+                            case sf::Event::Closed :
+                                window.close();
+                                break;
+
+
+                            case sf::Event::MouseButtonReleased :
+                                window.setView(view);
+                                window.setView(window.getDefaultView());
+                                if (event.mouseButton.button == sf::Mouse::Left)
+                                {
+                                    std::cout << event.mouseButton.x << "," << event.mouseButton.y <<  std::endl;
+                                }
+
+                                // sf::CircleShape circle = new sf::CircleShape(5.f);
+                                circle.setRadius(5.f);
+                                circle.setPosition(event.mouseButton.x, event.mouseButton.y);
+                                window.draw(circle);
+                                window.display();
+                                window.setView(window.getDefaultView());
+                                break;
+
+                            case sf::Event::Resized :
+                                sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+                                window.setView(sf::View(visibleArea));
+                                float aspectRatio = (float) window.getSize().x / (float) window.getSize().y ;
+                                view.setSize(VIEW_SIZE * aspectRatio, VIEW_SIZE);
+                                // minimap.setSize(5*VIEW_SIZE * aspectRatio, 5*VIEW_SIZE);
+                                // std::cout << "width " << event.size.width <<" height " << event.size.height<< " aspect Ratio " << aspectRatio << std::endl;
+                                break;
+                        }
+                    }
+                }
+                std::cout << "Fin." << std::endl;
+            }
 
         //Update
         voiture.update(deltaTime, *map);
