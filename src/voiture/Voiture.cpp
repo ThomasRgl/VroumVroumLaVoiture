@@ -71,6 +71,10 @@ void Voiture::update(double deltaTime, Circuit map){
     // acceleration += -speed * DeltaFrotement * 1/deltaTime * 0.001;
     // acceleration += speed * deltaTime * 0.95;
     speed += acceleration * deltaTime;
+    if(speed > maxSpeed)
+        speed = maxSpeed;
+    else if(speed < -maxSpeed)
+        speed = -maxSpeed;
     // speed *= 0.995;
 
     // std::cout <<"a        : "<< acceleration - speed * DeltaFrotement<<std::endl;
@@ -179,7 +183,7 @@ void Voiture::collide(Circuit map){
         checkZone(map);
         oldPosition = position;
         boolAlive = false;
-        std::cout << "Collision - x :  " << I->x << "  y : " << I->y << std::endl;
+        // std::cout << "Collision - x :  " << I->x << "  y : " << I->y << std::endl;
         }
 
     return;
@@ -187,7 +191,7 @@ void Voiture::collide(Circuit map){
 
 void Voiture::updateView(Circuit map){
     float newDistance;
-    float alpha = 360/NUM_VIEW;
+    float alpha = 180/ (NUM_VIEW - 1);
     sf::Vector2f A;
     sf::Vector2f B;
     boost::optional<sf::Vector2f> I;
@@ -202,29 +206,29 @@ void Voiture::updateView(Circuit map){
     for(size_t i = 0; i != NUM_VIEW; i++){
 
         // std::cout << "angle" << angle + alpha * (i + 1) << std::endl;
-        float radiant  = (angle + alpha * (i + 1)  ) * (3.142 / 180.0);
-        B.x = cos(radiant) * 10000 + position.x;
-        B.y = sin(radiant) * 10000 + position.y;
+        float radiant  = (angle - 90 + alpha * i   ) * (3.142 / 180.0);
+        B.x = cos(radiant) * viewDistanceMax + position.x;
+        B.y = sin(radiant) * viewDistanceMax + position.y;
         view[i] = B ;
-        viewDistance[i] = 100000000000000;
+        viewDistance[i] = viewDistanceMax;
 
         for(size_t zone = 0; zone != map.getSize(); zone++){
 
             //ext
             if( I = intersectV2(A, B, map.GetVertices(2 * zone).position, map.GetVertices(2 * zone + 2).position ) ){
-                newDistance = pow(I->x - position.x, 2) + pow(I->y - position.y, 2);
+                newDistance = sqrt(pow(I->x - position.x, 2) + pow(I->y - position.y, 2));
                 if(newDistance < viewDistance[i]){
                     view[i] = *I ;
-                    viewDistance[i] = sqrt(newDistance);
+                    viewDistance[i] = newDistance;
                 }
             }
 
             //int
             else if(  I = intersectV2(A, B, map.GetVertices(2 * zone + 1).position, map.GetVertices(2 * zone + 3).position) ){
-                newDistance = pow(I->x - position.x, 2) + pow(I->y - position.y, 2);
+                newDistance = sqrt(pow(I->x - position.x, 2) + pow(I->y - position.y, 2));
                 if(newDistance < viewDistance[i]){
                     view[i] = *I ;
-                    viewDistance[i] = sqrt(newDistance);
+                    viewDistance[i] = newDistance;
                 }
             }
 
@@ -245,20 +249,22 @@ void Voiture::updateDistanceToCheckpoint(Circuit map){
         sf::Vector2f C = map.GetVertices(2 * zone + 2).position; // zone suivante
         sf::Vector2f D = map.GetVertices(2 * zone + 3).position;
         pointCP = minimum_distance(C, D, position);
-
+        distanceCP = sqrt( pow(position.x - pointCP.x, 2) + pow(position.y - pointCP.y, 2) );
+        // std::cout << "dtcp" << distanceCP << '\n';
 }
 
 double*  Voiture::getInput(){
     double* inputs = (double*) malloc( getNumInput() * sizeof(double) );
-    inputs[1] = speed;
-    inputs[2] = distanceCP;
+    memset(inputs, 0, getNumInput() * sizeof(double));
+    inputs[0] = (speed + maxSpeed) / (2 * maxSpeed);
+    // inputs[2] = distanceCP;
     for(int i = 0; i != NUM_VIEW; i++){
-        inputs[i + 2] = viewDistance[i];
+        inputs[i + 1] = viewDistance[i] / viewDistanceMax;
     }
 
     return inputs;
 }
 
 size_t Voiture::getNumInput(){
-    return 1 + 1 + NUM_VIEW;
+    return 1 +  NUM_VIEW;
 }

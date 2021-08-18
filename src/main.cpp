@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-
+#include <iomanip>
 
 #include "circuit/Circuit.hpp"
 #include "voiture/Voiture.hpp"
@@ -64,6 +64,7 @@ void game(NeuralNetwork * nn, void * args){
                 break;
             case 1:
                 voiture.accelerate(deltaTime, -1 );
+                break;
             case 2:
                 voiture.turn(deltaTime, -1 );
                 break;
@@ -84,7 +85,6 @@ void game(NeuralNetwork * nn, void * args){
         voiture.update( deltaTime, *map );
 
     }
-
     setScore(nn, voiture.getScore() + 1, voiture.getScore() + 1);
     printf("%f\n", voiture.getScore() + 1 );
 
@@ -169,6 +169,7 @@ void ShowGame( NeuralNetwork * nn, void * args){
 
         //time elapsed
         deltaTime = clock.restart().asSeconds();
+        // deltaTime = 0.05;
         fps.setString("fps : " +  std::to_string(1.f / deltaTime));
 
 
@@ -178,14 +179,31 @@ void ShowGame( NeuralNetwork * nn, void * args){
 
 
         //process
-        resultat = computeNN( nn, voiture.getInput() );
+        double * input = voiture.getInput();
 
+        // for(size_t j = 0; j < voiture.getNumInput(); j++)
+        //     std::cout <<  j <<" : " << input[j] << '\n';
+        // double machin;
+        // for(size_t k = 0; k < 1000; k+=10){
+        //     if(k > 100){
+        //
+        //     }
+        //     else{
+        //
+        //     }
+        //     double machin = (pow(k*10 ,2) -  100000 + k * k * 10) / 10000;
+        //     std::cout << k * 10 << "\t" << machin << "\t" << sigmoid(machin) << '\n';
+        // }
+
+        resultat = computeNN( nn, input);
+        std::cout << "resultat : " << resultat << '\n';
         switch (resultat) {
             case 0:
                 voiture.accelerate(deltaTime, 1 );
                 break;
             case 1:
                 voiture.accelerate(deltaTime, -1 );
+                break;
             case 2:
                 voiture.turn(deltaTime, -1 );
                 break;
@@ -245,19 +263,20 @@ void ShowGame( NeuralNetwork * nn, void * args){
         window.draw(fps);
         window.display();
 
-        if( !(voiture.isAlive() && voiture.getFuel() > 0) ){
+        if( !(voiture.isAlive() ) ){
             window.close();
         }
 
     }
 
+    getchar();
     return ;
 
 }
 
 
 
-int main()
+int main_()
 {
     srand(time(NULL));
 
@@ -268,11 +287,11 @@ int main()
 
 
     NewConfig(
-        4,       // size_t taille_population,
-        100,        //size_t nombre de generation
+        50,       // size_t taille_population,
+        300,        //size_t nombre de generation
 
         Voiture::getNumInput(),          // size_t nbNeuronsInput,
-        8,          // size_t nbNeuronsHidden,
+        5,          // size_t nbNeuronsHidden,
         5,          // size_t nbNeuronsOutput,
 
         1,          // size_t nbHiddenLayer,
@@ -281,7 +300,7 @@ int main()
         0.05,       // double sigmaMutation,
         0.3,        // double crossoverRate,
 
-        2           //size_t nbThread
+        1           //size_t nbThread
     );
 
     Circuit map1("test.csv");
@@ -308,13 +327,17 @@ int main()
 
     return 0;
 
-    /*
-    sigmoid(20);
+}
+
+//manual
+int main_(){
+
+
 
     sf::RenderWindow window(sf::VideoMode(VIEW_SIZE, VIEW_SIZE), "Vroum Vroum la voiture");
 
     // Sync Framerate and speed
-    window.setFramerateLimit(100);
+    window.setFramerateLimit(10);
 
     //
     sf::View view(sf::Vector2f(0.0f,0.0f), sf::Vector2f( VIEW_SIZE, VIEW_SIZE));
@@ -330,12 +353,14 @@ int main()
 
     //
     sf::Clock clock;
-    Circuit map("test.csv");
-    double multiplier = 50;
+    Circuit mapa("test.csv");
+    Circuit * map;
+    map = & mapa; //= ((VroumVroumArgs *) args)->circuit;
+    // double multiplier = 50;
     double deltaTime;
 
-    u_int window_size_x = window.getSize().x;
-    u_int window_size_y = window.getSize().y;
+    // u_int window_size_x = window.getSize().x;
+    // u_int window_size_y = window.getSize().y;
 
     // UI
     sf::Text fps;
@@ -346,12 +371,17 @@ int main()
     fps.setPosition(10.f, 10.f);
 
     // World
-    std::vector<sf::Vertex>* vertices = map.getVertices();
-    float pos_x = ( (*vertices)[0].position.x + (*vertices)[1].position.x + (*vertices)[2].position.x + (*vertices)[3].position.x)/4;
-    float pos_y = ( (*vertices)[0].position.y + (*vertices)[1].position.y + (*vertices)[2].position.y + (*vertices)[3].position.y)/4;
-    Voiture voiture(voiture_texture, sf::Vector2f( pos_x, pos_y ));
+    // std::vector<sf::Vertex>* vertices = map.getVertices();
+    // float pos_x = ( (*vertices)[0].position.x + (*vertices)[1].position.x + (*vertices)[2].position.x + (*vertices)[3].position.x)/4;
+    // float pos_y = ( (*vertices)[0].position.y + (*vertices)[1].position.y + (*vertices)[2].position.y + (*vertices)[3].position.y)/4;
+    // Voiture voiture(voiture_texture, sf::Vector2f( pos_x, pos_y ));
+    Voiture voiture( voiture_texture, sf::Vector2f( map->getZoneCenter() ));
+    voiture.updateView(*map);
 
-    voiture.updateView(map);
+    int resultat = 4;
+    // double deltaTime = 0.1;
+    // int end = 0;
+
 
     while (window.isOpen())
     {
@@ -360,24 +390,22 @@ int main()
         sf::Event event;
         while (window.pollEvent(event))
         {
-            switch (event.type){
 
-                case sf::Event::MouseWheelMoved:
+            if( event.type == sf::Event::MouseWheelMoved ){
                     view.zoom(1 + event.mouseWheel.delta * -0.05f);
-                    break;
+                }
+            if( event.type == sf::Event::Closed ){
+                window.close();
+                }
+            if( event.type == sf::Event::Resized ){
 
-                case sf::Event::Closed :
-                    window.close();
-                    break;
+                sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+                window.setView(sf::View(visibleArea));
+                float aspectRatio = (float) window.getSize().x / (float) window.getSize().y ;
+                view.setSize(VIEW_SIZE * aspectRatio, VIEW_SIZE);
+                // minimap.setSize(5*VIEW_SIZE * aspectRatio, 5*VIEW_SIZE);
+                // std::cout << "width " << event.size.width <<" height " << event.size.height<< " aspect Ratio " << aspectRatio << std::endl;
 
-                case sf::Event::Resized:
-                    sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
-                    window.setView(sf::View(visibleArea));
-                    float aspectRatio = (float) window.getSize().x / (float) window.getSize().y ;
-                    view.setSize(VIEW_SIZE * aspectRatio, VIEW_SIZE);
-                    // minimap.setSize(5*VIEW_SIZE * aspectRatio, 5*VIEW_SIZE);
-                    // std::cout << "width " << event.size.width <<" height " << event.size.height<< " aspect Ratio " << aspectRatio << std::endl;
-                    break;
             }
         }
 
@@ -386,6 +414,12 @@ int main()
         fps.setString("fps : " +  std::to_string(1.f / deltaTime));
 
 
+
+            // std::cout << "zz" << std::endl;
+
+
+
+        //process
 
         //Update Shapes ZQSD
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Z) )
@@ -397,57 +431,12 @@ int main()
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)  )
             voiture.turn(deltaTime, 1 );
 
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::M) ){
-            std::cout << "enregistrement en cours, appuyez sur echap pour finir" << std::endl;
-            while (! sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)){
-                sf::CircleShape circle;
-                while (window.pollEvent(event))
-                {
-                    switch (event.type){
-
-
-                        case sf::Event::Closed :
-                            window.close();
-                            break;
-
-
-                        case sf::Event::MouseButtonReleased :
-                            window.setView(view);
-                            window.setView(window.getDefaultView());
-                            if (event.mouseButton.button == sf::Mouse::Left)
-                            {
-                                std::cout << event.mouseButton.x << "," << event.mouseButton.y <<  std::endl;
-                            }
-
-                            // sf::CircleShape circle = new sf::CircleShape(5.f);
-                            circle.setRadius(5.f);
-                            circle.setPosition(event.mouseButton.x, event.mouseButton.y);
-                            window.draw(circle);
-                            window.display();
-                            window.setView(window.getDefaultView());
-                            break;
-
-                        case sf::Event::Resized :
-                            sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
-                            window.setView(sf::View(visibleArea));
-                            float aspectRatio = (float) window.getSize().x / (float) window.getSize().y ;
-                            view.setSize(VIEW_SIZE * aspectRatio, VIEW_SIZE);
-                            // minimap.setSize(5*VIEW_SIZE * aspectRatio, 5*VIEW_SIZE);
-                            // std::cout << "width " << event.size.width <<" height " << event.size.height<< " aspect Ratio " << aspectRatio << std::endl;
-                            break;
-                    }
-                }
-            }
-            std::cout << "Fin." << std::endl;
-        }
-            // std::cout << "zz" << std::endl;
-
-
         //Update
-        voiture.update(deltaTime, map);
+        voiture.update(deltaTime, *map);
+        voiture.UpdateSprite();
 
+        map->highlightZone(voiture.getZone());
 
-        map.highlightZone(voiture.getZone());
 
 
 
@@ -459,7 +448,7 @@ int main()
         window.setView(view);
 
         //draw
-        window.draw(map);
+        window.draw(*map);
         window.draw(voiture.getSprite());
 
         //draw view
@@ -483,8 +472,14 @@ int main()
         window.setView(window.getDefaultView());
         window.draw(fps);
         window.display();
+
+        // if( !(voiture.isAlive() && voiture.getFuel() > 0) ){
+        //     window.close();
+        // }
+
     }
 
+
     return 0;
-    */
+
 }

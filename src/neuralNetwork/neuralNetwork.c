@@ -131,6 +131,7 @@ Layer * newLayer(size_t size, Layer * previousLayer){
 
         // init weights
         new->weights = malloc(size * previousLayer->size * sizeof(double));
+        printf("size : %ld, prev size : %ld, \n", size, previousLayer->size);
         memset(new->weights, 0, size * previousLayer->size);
 
         // init weights
@@ -171,7 +172,8 @@ Initiliase la valeur des neurones d'un layer avec une liste d'input
 */
 void setInput(Layer * layer, double * inputList){
     for(size_t i = 0; i < params.nbNeuronsInput; i++){
-        layer->neurons[i] = sigmoid(inputList[i]);
+        // layer->neurons[i] = sigmoid(inputList[i]);
+        layer->neurons[i] = inputList[i];
     }
     free(inputList);
 }
@@ -317,6 +319,11 @@ void crossover(NeuralNetwork * nn, NeuralNetwork * father, NeuralNetwork * mothe
     int remainingToLocation = ((double) rand_r(&seed)/ (double) RAND_MAX )*(params.totalWeight - params.tailleCrossoverMax);
     int crossoverRemaining = params.tailleCrossoverMax;
 
+    printf("totalWeight%ld\n", params.totalWeight);
+    printf("tailleCrossoverMax%ld\n", params.tailleCrossoverMax);
+    printf("remainingToLocation%d\n", remainingToLocation);
+    printf("crossoverRemaining%d\n", crossoverRemaining);
+
     Layer * layerA = father->firstLayer->nextLayer;
     Layer * layerB = mother->firstLayer->nextLayer;
     Layer * layer = nn->firstLayer->nextLayer;
@@ -339,6 +346,12 @@ void crossover(NeuralNetwork * nn, NeuralNetwork * father, NeuralNetwork * mothe
                     remainingToLocation -= 1;
                 }
                 else {
+                    printf("rl : %d\n", remainingToLocation );
+                    printf("cr : %d\n", crossoverRemaining );
+                    printf("i : %lld\n", i );
+                    printf("j : %lld\n", j );
+                    printf("layer->size : %ld\n", layer->size );
+                    printf("layer->previousLayer->size : %ld\n", layer->previousLayer->size );
                     layer->weights[i * layer->size + j] = (layerB->weights)[i * layer->size + j];
                     crossoverRemaining -= 1;
                 }
@@ -573,8 +586,8 @@ void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn, void * gameA
 
     Thread ** threadList = malloc(params.nbThread * sizeof(Thread));
     pthread_t * idList = malloc(params.nbThread * sizeof(pthread_t));
-
     thread_args * args = malloc( params.nbThread * sizeof(thread_args) );
+
     for( size_t i = 0; i < params.nbThread; i++){
         args[i].func = gameFunc;
         args[i].gameArgs = gameArgs;
@@ -605,7 +618,7 @@ void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn, void * gameA
 
         //écrit les scores dans les logs
         writeLogScore(fileScore, population);
-        if( g%1 == 0){
+        if( g%10 == 0){
             playBestFunc(bestElement(population), gameArgs );
         }
     }
@@ -624,6 +637,7 @@ void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn, void * gameA
 
     free(threadList);
     free(idList);
+    free(args);
 
     freePopulation( population );
     closeLog(fileScore);

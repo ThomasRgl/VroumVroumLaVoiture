@@ -5,7 +5,7 @@ SFML_FLAG= -lsfml-graphics -lsfml-window -lsfml-system
 SFML_OUT= sfml-app.out
 # INPUT_FILE= main.cpp  Entity.cpp
 FLAG_OPTI = -O3 -finline-functions -funroll-loops -march=native -mtune=native -flto
-DEBUG_FLAG = -g -Wall -Werror
+DEBUG_FLAG = -ggdb3 
 LFLAGS=-lm -lpthread
 
 

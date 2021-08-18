@@ -6,10 +6,11 @@
 #include <iostream>
 #include <cmath>
 #include <boost/optional.hpp>
+#include <cstring>
 
 #include "../circuit/Circuit.hpp"
 
-static const float NUM_VIEW = 8;
+static const float NUM_VIEW = 5;
 
 class Voiture  {
 
@@ -21,9 +22,11 @@ public:
     sf::Sprite sprite;
 
     std::vector<sf::Vector2f> view;
-    double viewDistance[8];
 
-    double distanceCP;
+    double viewDistance[8];
+    double viewDistanceMax = 300;
+
+    double distanceCP = 100;
     sf::Vector2f pointCP;
 
     double apf = 250; //acceleration per frame
@@ -33,8 +36,9 @@ public:
     double speed = 0;
     double angle = 0;
     double acceleration = 0;
+    double maxSpeed = 30;
 
-    int maxFuel = 200;
+    int maxFuel = 4000;
     int fuel = 0;
     bool boolAlive = false;
     int score = 0;
