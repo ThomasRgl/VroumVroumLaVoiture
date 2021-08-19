@@ -86,14 +86,14 @@ Config NewConfig(
     params.crossoverRate = crossoverRate;
 
     if( params.nbHiddenLayer == 0 ){
-        params.totalWeight = ( params.nbNeuronsInput + 1 ) * params.nbNeuronsOutput;
+        params.totalWeight = ( params.nbNeuronsInput /*+ 1*/ ) * params.nbNeuronsOutput;
     }
     else{
-        params.totalWeight = ( params.nbNeuronsInput + 1 ) * params.nbNeuronsHidden;
+        params.totalWeight = ( params.nbNeuronsInput /*+ 1*/ ) * params.nbNeuronsHidden;
         for ( size_t i = 1; i < params.nbHiddenLayer; i ++){
-            params.totalWeight +=  ( params.nbNeuronsHidden + 1 ) * params.nbNeuronsHidden;
+            params.totalWeight +=  ( params.nbNeuronsHidden /*+ 1*/ ) * params.nbNeuronsHidden;
         }
-        params.totalWeight += ( params.nbNeuronsHidden + 1 ) * params.nbNeuronsOutput;
+        params.totalWeight += ( params.nbNeuronsHidden /*+ 1*/ ) * params.nbNeuronsOutput;
     }
 
     params.tailleCrossoverMax  = params.totalWeight * params.crossoverRate ;
@@ -318,45 +318,42 @@ Effectue un croisement entre un neural network pere et neural network mere
 void crossover(NeuralNetwork * nn, NeuralNetwork * father, NeuralNetwork * mother ){
     int remainingToLocation = ((double) rand_r(&seed)/ (double) RAND_MAX )*(params.totalWeight - params.tailleCrossoverMax);
     int crossoverRemaining = params.tailleCrossoverMax;
-
-    printf("totalWeight%ld\n", params.totalWeight);
-    printf("tailleCrossoverMax%ld\n", params.tailleCrossoverMax);
-    printf("remainingToLocation%d\n", remainingToLocation);
-    printf("crossoverRemaining%d\n", crossoverRemaining);
+    size_t size;
+    double layerSize;
+    size_t i;
+    // printf("totalWeight%ld\n", params.tgmg);
 
     Layer * layerA = father->firstLayer->nextLayer;
     Layer * layerB = mother->firstLayer->nextLayer;
     Layer * layer = nn->firstLayer->nextLayer;
-
+    printf("NEW ----- \n" );
+    // printf("total weights %ld\n", params.totalWeight);
     while(layer){
-        for (unsigned long long i = 0; i < layer->size ; i++) {
-            if( crossoverRemaining == 0 || remainingToLocation != 0){
-                layer->bias[i] = layerA->bias[i];
-                remainingToLocation -= 1;
-            }
-            else {
-                layer->bias[i] = layerB->bias[i];
-                crossoverRemaining -= 1;
-            }
+        // printf("remainingToLocation : %d\n", remainingToLocation);
+        // printf("crossoverRemaining : %d\n", crossoverRemaining);
+        layerSize = layer->size * layer->previousLayer->size;
+        memcpy(layer->weights, layerA->weights, layerSize * sizeof(double));
+        memcpy(layer->bias, layerA->bias, layer->size * sizeof(double));
+        remainingToLocation -= layerSize;
+        if( remainingToLocation < 0 && crossoverRemaining > 0){
+            i = layerSize + remainingToLocation;
+            if(crossoverRemaining > (layerSize - i))
+                size = layerSize - i;
+            else
+                size = crossoverRemaining;
+            crossoverRemaining -= size;
+            remainingToLocation = 0;
+            printf("totalWeight %ld \n", params.totalWeight);
+            printf("layer size %f \n", layerSize);
+            printf("cr : %d\n",  crossoverRemaining);
+            printf("rtl : %d\n",  remainingToLocation);
+            printf("i %ld \n", i);
+            printf("size %ld \n", size);
+            printf("-----------------\n");
 
-            for (unsigned long long j = 0; j < layer->previousLayer->size; j++ ){
-
-                if( crossoverRemaining == 0 || remainingToLocation != 0){
-                    layer->weights[i * layer->size + j] = (layerA->weights)[i * layer->size + j];
-                    remainingToLocation -= 1;
-                }
-                else {
-                    printf("rl : %d\n", remainingToLocation );
-                    printf("cr : %d\n", crossoverRemaining );
-                    printf("i : %lld\n", i );
-                    printf("j : %lld\n", j );
-                    printf("layer->size : %ld\n", layer->size );
-                    printf("layer->previousLayer->size : %ld\n", layer->previousLayer->size );
-                    layer->weights[i * layer->size + j] = (layerB->weights)[i * layer->size + j];
-                    crossoverRemaining -= 1;
-                }
-            }
+            memcpy(&(layer->weights[i]), &(layerB->weights[i]), (size-1) * sizeof(double));
         }
+
         layer = layer->nextLayer;
         layerA = layerA->nextLayer;
         layerB = layerB->nextLayer;
@@ -364,6 +361,56 @@ void crossover(NeuralNetwork * nn, NeuralNetwork * father, NeuralNetwork * mothe
     }
 
 }
+
+// void crossover(NeuralNetwork * nn, NeuralNetwork * father, NeuralNetwork * mother ){
+//     int remainingToLocation = ((double) rand_r(&seed)/ (double) RAND_MAX )*(params.totalWeight - params.tailleCrossoverMax);
+//     int crossoverRemaining = params.tailleCrossoverMax;
+//
+//     printf("totalWeight%ld\n", params.totalWeight);
+//     printf("tailleCrossoverMax%ld\n", params.tailleCrossoverMax);
+//     printf("remainingToLocation%d\n", remainingToLocation);
+//     printf("crossoverRemaining%d\n", crossoverRemaining);
+//
+//     Layer * layerA = father->firstLayer->nextLayer;
+//     Layer * layerB = mother->firstLayer->nextLayer;
+//     Layer * layer = nn->firstLayer->nextLayer;
+//
+//     while(layer){
+//         for (unsigned long long i = 0; i < layer->size ; i++) {
+//             if( crossoverRemaining == 0 || remainingToLocation != 0){
+//                 layer->bias[i] = layerA->bias[i];
+//                 remainingToLocation -= 1;
+//             }
+//             else {
+//                 layer->bias[i] = layerB->bias[i];
+//                 crossoverRemaining -= 1;
+//             }
+//
+//             for (unsigned long long j = 0; j < layer->previousLayer->size; j++ ){
+//
+//                 if( crossoverRemaining == 0 || remainingToLocation != 0){
+//                     layer->weights[i * layer->size + j] = (layerA->weights)[i * layer->size + j];
+//                     remainingToLocation -= 1;
+//                 }
+//                 else {
+//                     printf("rl : %d\n", remainingToLocation );
+//                     printf("cr : %d\n", crossoverRemaining );
+//                     printf("i : %lld\n", i );
+//                     printf("j : %lld\n", j );
+//                     printf("layer->size : %ld\n", layer->size );
+//                     printf("layer->previousLayer->size : %ld\n", layer->previousLayer->size );
+//                     layer->weights[i * layer->size + j] = (layerB->weights)[i * layer->size + j];
+//                     crossoverRemaining -= 1;
+//                 }
+//             }
+//         }
+//         layer = layer->nextLayer;
+//         layerA = layerA->nextLayer;
+//         layerB = layerB->nextLayer;
+//
+//     }
+//
+// }
 
 /*
 Lance la mutation sur un neural network

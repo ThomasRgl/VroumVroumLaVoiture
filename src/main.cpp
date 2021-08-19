@@ -300,7 +300,7 @@ int main()
         0.05,       // double sigmaMutation,
         0.3,        // double crossoverRate,
 
-        1           //size_t nbThread
+        5           //size_t nbThread
     );
 
     Circuit map1("c1.csv");
