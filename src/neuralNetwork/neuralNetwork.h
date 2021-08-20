@@ -123,6 +123,9 @@
     pthread_barrier_t barrier1;
     pthread_barrier_t barrier2;
     pthread_barrier_t barrier3;
+    pthread_barrier_t barrier4;
+    pthread_barrier_t printBarrer;
+
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////                              Other                                /////////////////

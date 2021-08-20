@@ -48,7 +48,11 @@ void game(NeuralNetwork * nn, void * args){
 
     int resultat = 4;
     while(voiture.isAlive() && voiture.getFuel() != 0 ){
-        resultat = computeNN( nn, voiture.getInput() );
+        double * input = voiture.getInput();
+
+        for(size_t j = 0; j < voiture.getNumInput(); j++)
+            std::cout <<  j <<" : " << input[j] << '\n';
+        resultat = computeNN( nn, input);
         //                      Affichage
         // jump(10);
         // printNetwork(population[i]);
@@ -199,16 +203,16 @@ void ShowGame( NeuralNetwork * nn, void * args){
         // std::cout << "resultat : " << resultat << '\n';
         switch (resultat) {
             case 0:
-                voiture.accelerate(deltaTime, 1 );
+                // voiture.accelerate(deltaTime, 1 );
                 break;
             case 1:
-                voiture.accelerate(deltaTime, -1 );
+                // voiture.accelerate(deltaTime, -1 );
                 break;
             case 2:
-                voiture.turn(deltaTime, 1 );
+                // voiture.turn(deltaTime, 1 );
                 break;
             case 3:
-                voiture.turn(deltaTime, -1 );
+                // voiture.turn(deltaTime, -1 );
                 break;
             case 4:
                 break;
@@ -287,8 +291,8 @@ int main()
 
 
     NewConfig(
-        50,       // size_t taille_population,
-        300,        //size_t nombre de generation
+        4,       // size_t taille_population,
+        5,        //size_t nombre de generation
 
         Voiture::getNumInput(),          // size_t nbNeuronsInput,
         5,          // size_t nbNeuronsHidden,
@@ -300,7 +304,7 @@ int main()
         0.05,       // double sigmaMutation,
         0.3,        // double crossoverRate,
 
-        5           //size_t nbThread
+        1           //size_t nbThread
     );
 
     Circuit map1("c1.csv");

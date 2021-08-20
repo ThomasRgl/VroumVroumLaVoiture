@@ -326,7 +326,7 @@ void crossover(NeuralNetwork * nn, NeuralNetwork * father, NeuralNetwork * mothe
     Layer * layerA = father->firstLayer->nextLayer;
     Layer * layerB = mother->firstLayer->nextLayer;
     Layer * layer = nn->firstLayer->nextLayer;
-    printf("NEW ----- \n" );
+    // printf("NEW ----- \n" );
     // printf("total weights %ld\n", params.totalWeight);
     while(layer){
         // printf("remainingToLocation : %d\n", remainingToLocation);
@@ -343,13 +343,13 @@ void crossover(NeuralNetwork * nn, NeuralNetwork * father, NeuralNetwork * mothe
                 size = crossoverRemaining;
             crossoverRemaining -= size;
             remainingToLocation = 0;
-            printf("totalWeight %ld \n", params.totalWeight);
-            printf("layer size %f \n", layerSize);
-            printf("cr : %d\n",  crossoverRemaining);
-            printf("rtl : %d\n",  remainingToLocation);
-            printf("i %ld \n", i);
-            printf("size %ld \n", size);
-            printf("-----------------\n");
+            // printf("totalWeight %ld \n", params.totalWeight);
+            // printf("layer size %f \n", layerSize);
+            // printf("cr : %d\n",  crossoverRemaining);
+            // printf("rtl : %d\n",  remainingToLocation);
+            // printf("i %ld \n", i);
+            // printf("size %ld \n", size);
+            // printf("-----------------\n");
 
             memcpy(&(layer->weights[i]), &(layerB->weights[i]), (size-1) * sizeof(double));
         }
@@ -361,56 +361,6 @@ void crossover(NeuralNetwork * nn, NeuralNetwork * father, NeuralNetwork * mothe
     }
 
 }
-
-// void crossover(NeuralNetwork * nn, NeuralNetwork * father, NeuralNetwork * mother ){
-//     int remainingToLocation = ((double) rand_r(&seed)/ (double) RAND_MAX )*(params.totalWeight - params.tailleCrossoverMax);
-//     int crossoverRemaining = params.tailleCrossoverMax;
-//
-//     printf("totalWeight%ld\n", params.totalWeight);
-//     printf("tailleCrossoverMax%ld\n", params.tailleCrossoverMax);
-//     printf("remainingToLocation%d\n", remainingToLocation);
-//     printf("crossoverRemaining%d\n", crossoverRemaining);
-//
-//     Layer * layerA = father->firstLayer->nextLayer;
-//     Layer * layerB = mother->firstLayer->nextLayer;
-//     Layer * layer = nn->firstLayer->nextLayer;
-//
-//     while(layer){
-//         for (unsigned long long i = 0; i < layer->size ; i++) {
-//             if( crossoverRemaining == 0 || remainingToLocation != 0){
-//                 layer->bias[i] = layerA->bias[i];
-//                 remainingToLocation -= 1;
-//             }
-//             else {
-//                 layer->bias[i] = layerB->bias[i];
-//                 crossoverRemaining -= 1;
-//             }
-//
-//             for (unsigned long long j = 0; j < layer->previousLayer->size; j++ ){
-//
-//                 if( crossoverRemaining == 0 || remainingToLocation != 0){
-//                     layer->weights[i * layer->size + j] = (layerA->weights)[i * layer->size + j];
-//                     remainingToLocation -= 1;
-//                 }
-//                 else {
-//                     printf("rl : %d\n", remainingToLocation );
-//                     printf("cr : %d\n", crossoverRemaining );
-//                     printf("i : %lld\n", i );
-//                     printf("j : %lld\n", j );
-//                     printf("layer->size : %ld\n", layer->size );
-//                     printf("layer->previousLayer->size : %ld\n", layer->previousLayer->size );
-//                     layer->weights[i * layer->size + j] = (layerB->weights)[i * layer->size + j];
-//                     crossoverRemaining -= 1;
-//                 }
-//             }
-//         }
-//         layer = layer->nextLayer;
-//         layerA = layerA->nextLayer;
-//         layerB = layerB->nextLayer;
-//
-//     }
-//
-// }
 
 /*
 Lance la mutation sur un neural network
@@ -572,7 +522,7 @@ Thread * NewThread(Population *population, size_t numThread, pthread_t * id){
 Fonction que chaque thread fils va executer
 */
 void * runFils(void *voidArgs){//void *voidThread, void (*gameFunc) (NeuralNetwork * nn) ){
-
+    srand(time(NULL));
     thread_args * args = (thread_args *)voidArgs;
     // Thread * thread = (Thread *)voidThread;
     Thread * thread = args->thread;
@@ -592,13 +542,14 @@ void * runFils(void *voidArgs){//void *voidThread, void (*gameFunc) (NeuralNetwo
         printf("calcul fitness\n" );
         calculateFitness(thread);
 
+        pthread_barrier_wait(&printBarrer);
         //thread synchronisation pour evolution
         pthread_barrier_wait(&barrier3);
         printf("evolve\n" );
         evolve(thread);
 
         printf("end thread\n" );
-
+        pthread_barrier_wait(&barrier4);
     }
 
     return 0;
@@ -615,7 +566,7 @@ Fonction executée par le thread père
 elle créer n threads fils puis les coordonne un certain nombre de génération
 */
 void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn, void * gameArgs) , void (*playBestFunc)(NeuralNetwork * nn, void * gameArgs), void * gameArgs ){
-
+    srand(time(NULL));
     //ouverture fichier de log
     fileScore = openLog( fileName );
 
@@ -624,9 +575,11 @@ void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn, void * gameA
 
     //initialisation des barrières
     //la barriere bloque les threads jusqu'à ce que 'params.nbThread + 1' soient bloqués
-    pthread_barrier_init(&barrier1, NULL, params.nbThread + 1);
+    pthread_barrier_init(&barrier1, NULL, params.nbThread + 1);//TODO remove barrier global variable
     pthread_barrier_init(&barrier2, NULL, params.nbThread + 1);
     pthread_barrier_init(&barrier3, NULL, params.nbThread + 1);
+    pthread_barrier_init(&barrier4, NULL, params.nbThread + 1);
+    pthread_barrier_init(&printBarrer, NULL, params.nbThread + 1);
 
 
     // boucle de création et lancement des threads
@@ -644,6 +597,13 @@ void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn, void * gameA
         // getchar()
     }
 
+    printf("////////////////////////////////////////////////////////////////////////////////////////////\n" );
+    printf("///////                                   GEN : 0                                    ///////\n" );
+    printf("////////////////////////////////////////////////////////////////////////////////////////////\n" );
+    printPopulaton(population);
+    printf("////////////////////////////////////////////////////////////////////////////////////////////\n" );
+    printf("///////                                      END                                      ///////\n");
+    printf("////////////////////////////////////////////////////////////////////////////////////////////\n" );
     //
     for(size_t g = 0; g < params.generation; g++){
         // printf("GEN : %ld\n", g );
@@ -655,19 +615,30 @@ void runPere( char *fileName, void (*gameFunc) (NeuralNetwork * nn, void * gameA
         // FITNESS - resynchronise les threads
         pthread_barrier_wait(&barrier2);
 
+        printf("////////////////////////////////////////////////////////////////////////////////////////////\n" );
+        printf("///////                                   GEN : %ld                                    ///////\n", g + 1 );
+        printf("////////////////////////////////////////////////////////////////////////////////////////////\n" );
+        printPopulaton(population);
+        printf("////////////////////////////////////////////////////////////////////////////////////////////\n" );
+        printf("///////                                      END                                      ///////\n");
+        printf("////////////////////////////////////////////////////////////////////////////////////////////\n" );
+
+        pthread_barrier_wait(&printBarrer);
         // EVOLUTION - resynchronise les threads
         pthread_barrier_wait(&barrier3);
 
+        //EndSync
+        pthread_barrier_wait(&barrier4);
         // printf("FIN GEN \n" );
 
-
-        printf("gen :  %ld\n", g);
-
+        // printf("gen :  %ld\n", g + 1);
         //écrit les scores dans les logs
         writeLogScore(fileScore, population);
-        if( g%10 == 0){
-            playBestFunc(bestElement(population), gameArgs );
-        }
+        // if( g%10 == 0){
+        //     playBestFunc(bestElement(population), gameArgs );
+        // }
+        getchar();
+
     }
 
     //termine les threads
@@ -925,6 +896,7 @@ void printPopulaton(Population *population ){
     printf("///////             SECOND            ////////\n" );
     printf("//////////////////////////////////////////////\n" );
     for( size_t i = 0; i < population->size; i++){
+        printf("///////        %ld       ////////\n", i );
         printNetwork( population->secondPopulation[i]);
     }
 
@@ -933,6 +905,7 @@ void printPopulaton(Population *population ){
     printf("///////              FIRST            ////////\n" );
     printf("//////////////////////////////////////////////\n" );
     for( size_t i = 0; i < population->size; i++){
+        printf("///////        %ld       ////////\n", i );
         printNetwork( population->firstPopulation[i]);
     }
 
